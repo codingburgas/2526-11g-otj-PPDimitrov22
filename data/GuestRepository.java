@@ -1,14 +1,6 @@
 package data;
-import java.util.ArrayList;
-import java.util.List;
 
-public class GuestRepository
-{
-    private List<Guest> guests = new ArrayList<>();
-    public void save(Guest guest) {
-        guests.add(guest);
-    }
-    public List<Guest> getAll() {
-        return guests;
-    }
-}
+import model.Guest;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface GuestRepository extends JpaRepository<Guest, Long> {}

@@ -1,28 +1,20 @@
 package business;
 
-import java.util.ArrayList;
+import data.GuestRepository;
+import model.Guest;
+import org.springframework.stereotype.Service;
 import java.util.List;
 
+@Service
 public class GuestService {
-
-    private List<Guest> guests = new ArrayList<>();
-    private int nextId = 1;
-
-    public void addGuest(String name, String email) {
-        Guest guest = new Guest(nextId, name, email);
-        guests.add(guest);
-        nextId++;
-        System.out.println("The guest is added successfully!");
+    private final GuestRepository repo;
+    public GuestService(GuestRepository repo) {
+        this.repo = repo;
     }
-    public void showAllGuests() {
-        if (guests.isEmpty()) {
-            System.out.println("There are no guests at the moment");
-            return;
-        }
-
-        System.out.println("\n--- List of guests");
-        for (Guest g : guests) {
-            System.out.println(g);
-        }
+    public Guest add(Guest guest) {
+        return repo.save(guest);
+    }
+    public List<Guest> list() {
+        return repo.findAll();
     }
 }

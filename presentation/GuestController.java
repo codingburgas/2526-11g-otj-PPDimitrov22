@@ -1,14 +1,25 @@
 package presentation;
+
+import business.GuestService;
+import model.Guest;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@CrossOrigin
+@RequestMapping("/api/guests")
 public class GuestController {
-    private GuestService service;
-    public GuestController()
-    {
-        this.service = new GuestService();
+    private final GuestService service;
+    public GuestController(GuestService service) {
+        this.service = service;
     }
-    public void addGuest(String name, String email) {
-        service.addGuest(name, email);
+    @PostMapping
+    public Guest add(@RequestBody Guest guest) {
+        return service.add(guest);
     }
-    public void showAllGuests() {
-        service.showAllGuests();
+    @GetMapping
+    public List<Guest> list() {
+        return service.list();
     }
 }

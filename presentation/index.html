@@ -3,97 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Хотелска Система за Управление</title>
+    <title>Хотелска Система</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
 <nav class="navbar">
     <div class="nav-container">
         <h1 class="logo">Hotel Management</h1>
+
         <ul class="nav-menu">
-            <li><a href="#home" class="nav-link" onclick="showSection('home')">Начало</a></li>
-            <li><a href="#reservations" class="nav-link" onclick="showSection('reservations')">Резервации</a></li>
-            <li><a href="#guests" class="nav-link" onclick="showSection('guests')">Гости</a></li>
-            <li><a href="#rooms" class="nav-link" onclick="showSection('rooms')">Стаи</a></li>
-            <li><a href="#services" class="nav-link" onclick="showSection('services')">Услуги</a></li>
+            <li><a class="nav-link" onclick="showSection('home')">Начало</a></li>
+            <li><a class="nav-link" onclick="showSection('reservations')">Резервации</a></li>
+            <li><a class="nav-link" onclick="showSection('services')">Услуги</a></li>
+
+            <!-- ADMIN ONLY -->
+            <li id="adminRoomsMenu">
+                <a class="nav-link" onclick="showSection('rooms')">Стаи</a>
+            </li>
+
+            <li id="adminGuestsMenu">
+                <a class="nav-link" onclick="showSection('guests')">Гости</a>
+            </li>
+
+            <li>
+                <a class="nav-link" onclick="logout()">Изход</a>
+            </li>
         </ul>
     </div>
 </nav>
 
 <div class="container">
-    <section id="home" class="section active">
-        <div class="hero">
-            <h2>Добрe дошли в Хотелската Система</h2>
-            <p>Управлявайте резервации, гости и услуги лесно и ефективно</p>
-            <button class="btn btn-primary" onclick="showSection('reservations')">Започнете резервация</button>
-        </div>
-    </section>
 
-    <section id="reservations" class="section">
-        <h2> Управление на Резервации</h2>
-        <div class="form-container">
-            <h3>Нова Резервация</h3>
-            <input type="text" id="resGuestId" placeholder="ID на Гост" class="input-field">
-            <input type="text" id="resRoomId" placeholder="ID на Стая" class="input-field">
-            <input type="date" id="resCheckIn" class="input-field">
-            <input type="date" id="resCheckOut" class="input-field">
-            <button class="btn btn-success" onclick="addReservation()">Създай Резервация</button>
-        </div>
-        <div id="reservationsList" class="list-container"></div>
-    </section>
+<section id="home" class="section active">
+    <div class="hero">
+        <h2>Добре дошли</h2>
+    </div>
+</section>
 
-    <section id="guests" class="section">
-        <h2> Управление на Гости</h2>
-        <div class="form-container">
-            <h3>Регистриране на Гост</h3>
-            <input type="text" id="guestId" placeholder="ID на Гост" class="input-field">
-            <input type="text" id="guestName" placeholder="Име" class="input-field">
-            <input type="email" id="guestEmail" placeholder="Имейл" class="input-field">
-            <input type="tel" id="guestPhone" placeholder="Телефон" class="input-field">
-            <input type="text" id="guestAddress" placeholder="Адрес" class="input-field">
-            <button class="btn btn-success" onclick="addGuest()">Регистрирай Гост</button>
-        </div>
-        <div id="guestsList" class="list-container"></div>
-    </section>
+<section id="reservations" class="section">
+    <h2>Резервации</h2>
 
-    <section id="rooms" class="section">
-        <h2> Управление на Стаи</h2>
-        <div class="form-container">
-            <h3>Добави Нова Стая</h3>
-            <input type="text" id="roomId" placeholder="ID на Стая" class="input-field">
-            <input type="text" id="roomType" placeholder="Тип (Single, Double, Suite)" class="input-field">
-            <input type="number" id="roomPrice" placeholder="Цена за нощ" class="input-field">
-            <input type="number" id="roomCapacity" placeholder="Капацитет" class="input-field">
-            <button class="btn btn-success" onclick="addRoom()">Добави Стая</button>
-        </div>
-        <div id="roomsList" class="list-container"></div>
-    </section>
+    <select id="resRoomId" class="input-field"></select>
 
-    <section id="services" class="section">
-        <h2> Допълнителни Услуги</h2>
-        <div class="services-grid">
-            <div class="service-card">
-                <h3> Хранене</h3>
-                <p>закуска</p>
-                <p class="price">25-50 euro</p>
-            </div>
-            <div class="service-card">
-                <h3> СПА Процедури</h3>
-                <p>Масаж, сауна, басейн</p>
-                <p class="price">25-50 euro</p>
-            </div>
-            <div class="service-card">
-                <h3> Транспорт</h3>
-                <p>Наемане на кола</p>
-                <p class="price">30-60 euro</p>
-            </div>
-            <div class="service-card">
-                <h3> Екскурзии</h3>
-                <p>Туристически екскурзии</p>
-                <p class="price">50-150 euro</p>
-            </div>
+    <input type="date" id="resCheckIn" class="input-field">
+    <input type="date" id="resCheckOut" class="input-field">
+
+    <button class="btn btn-primary" onclick="addReservation()">Създай</button>
+
+    <div id="reservationsList"></div>
+</section>
+
+<section id="guests" class="section">
+    <h2>Гости</h2>
+
+    <input id="guestId" class="input-field">
+    <input id="guestName" class="input-field">
+    <input id="guestEmail" class="input-field">
+    <input id="guestPhone" class="input-field">
+    <input id="guestAddress" class="input-field">
+
+    <button class="btn btn-success" onclick="addGuest()">Добави</button>
+
+    <div id="guestsList"></div>
+</section>
+
+<section id="rooms" class="section">
+
+    <h2>Стаи (Admin)</h2>
+
+    <div id="roomForm">
+        <input id="roomId" class="input-field">
+        <input id="roomType" class="input-field">
+        <input id="roomPrice" class="input-field">
+        <input id="roomCapacity" class="input-field">
+
+        <button class="btn btn-success" onclick="addRoom()">Добави</button>
+    </div>
+
+    <div id="roomsList"></div>
+</section>
+
+<section id="services" class="section">
+    <h2>Услуги</h2>
+
+    <div class="services-grid">
+        <div class="service-card">
+            <h3>Храна</h3>
+            <p>Закуска и вечеря</p>
+            <p class="price">25 - 50 лв</p>
         </div>
-    </section>
+
+        <div class="service-card">
+            <h3>СПА</h3>
+            <p>Масажи и басейн</p>
+            <p class="price">40 - 120 лв</p>
+        </div>
+
+        <div class="service-card">
+            <h3>Транспорт</h3>
+            <p>Летищен трансфер</p>
+            <p class="price">30 - 80 лв</p>
+        </div>
+
+        <div class="service-card">
+            <h3>Турове</h3>
+            <p>Екскурзии</p>
+            <p class="price">60 - 200 лв</p>
+        </div>
+    </div>
+</section>
+
 </div>
 
 <script src="main.js"></script>

@@ -10,13 +10,9 @@ let rooms = JSON.parse(localStorage.getItem("rooms")) || [
 
 let reservations = JSON.parse(localStorage.getItem("reservations")) || [];
 
-/* ROLE HELPERS */
+/* ROLE */
 function isAdmin() {
     return currentUser && currentUser.role === "ADMIN";
-}
-
-function isGuest() {
-    return currentUser && currentUser.role === "GUEST";
 }
 
 /* SAVE */
@@ -32,15 +28,12 @@ function saveReservations() {
 window.onload = function () {
     currentUser = JSON.parse(localStorage.getItem("hotelCurrentUser")) || null;
 
-    // hide admin menus if not admin
     const adminRooms = document.getElementById("adminRoomsMenu");
     const adminGuests = document.getElementById("adminGuestsMenu");
 
-    if (adminRooms && adminGuests) {
-        if (!isAdmin()) {
-            adminRooms.style.display = "none";
-            adminGuests.style.display = "none";
-        }
+    if (adminRooms && adminGuests && !isAdmin()) {
+        adminRooms.style.display = "none";
+        adminGuests.style.display = "none";
     }
 
     renderRoomOptions();
@@ -72,11 +65,6 @@ function addRoom() {
     const price = Number(document.getElementById("roomPrice").value);
     const capacity = Number(document.getElementById("roomCapacity").value);
 
-    if (!id || !type || !price || !capacity) {
-        alert("Fill all fields!");
-        return;
-    }
-
     rooms.push({ id, type, price, capacity, status: "available" });
     saveRooms();
 
@@ -84,35 +72,28 @@ function addRoom() {
     displayRooms();
 }
 
-/* DROPDOWN */
+/* ROOM OPTIONS */
 function renderRoomOptions() {
     const select = document.getElementById("resRoomId");
     if (!select) return;
 
     select.innerHTML = "";
 
-    if (!currentUser) return;
-
     rooms.forEach(r => {
         if (r.status === "available") {
             select.innerHTML += `
                 <option value="${r.id}">
-                    ${r.id} - ${r.type} (${r.price} Лв)
+                    ${r.id} - ${r.type} (${r.price} lv)
                 </option>
             `;
         }
     });
 }
 
-/* ROOMS */
+/* ROOMS VIEW */
 function displayRooms() {
     const list = document.getElementById("roomsList");
-    if (!list) return;
-
-    if (!isAdmin()) {
-        list.innerHTML = "";
-        return;
-    }
+    if (!list || !isAdmin()) return;
 
     list.innerHTML = "";
 
@@ -120,7 +101,7 @@ function displayRooms() {
         list.innerHTML += `
             <div class="list-item">
                 <div class="list-item-header">Room #${r.id} - ${r.type}</div>
-                <div class="list-item-detail">Price: ${r.price} Лв</div>
+                <div class="list-item-detail">Price: ${r.price} lv</div>
                 <div class="list-item-detail">Capacity: ${r.capacity}</div>
                 <div class="list-item-detail">Status: ${r.status}</div>
             </div>
@@ -128,13 +109,9 @@ function displayRooms() {
     });
 }
 
-/* RESERVATIONS */
+/* RESERVATION */
 function addReservation() {
-
-    if (!currentUser) {
-        alert("You must login first!");
-        return;
-    }
+    if (!currentUser) return alert("Login first!");
 
     const roomId = document.getElementById("resRoomId").value;
     const checkIn = document.getElementById("resCheckIn").value;
@@ -143,21 +120,28 @@ function addReservation() {
     const room = rooms.find(r => r.id === roomId);
     if (!room) return alert("Room not found");
 
-    const nights = Math.max(1,
+    const nights = Math.max(
+        1,
         Math.floor((new Date(checkOut) - new Date(checkIn)) / 86400000)
     );
 
-    const newId = reservations.length
-        ? Math.max(...reservations.map(r => r.id)) + 1
-        : 1;
+    const services = Array.from(document.querySelectorAll(".service-check:checked"))
+        .map(s => ({
+            name: s.dataset.name,
+            price: Number(s.dataset.price)
+        }));
+
+    const servicesTotal = services.reduce((a, b) => a + b.price, 0);
+
+    const totalPrice = nights * room.price + servicesTotal;
 
     reservations.push({
-        id: newId,
+        id: reservations.length + 1,
         guest: currentUser.username,
-        guestName: currentUser.fullName || currentUser.username,
         roomId,
         nights,
-        totalPrice: nights * room.price,
+        services,
+        totalPrice,
         status: "pending"
     });
 
@@ -171,32 +155,63 @@ function addReservation() {
     displayReservations();
 }
 
-/* RESERVATIONS VIEW */
+/* CANCEL RESERVATION */
+function cancelReservation(id) {
+    const index = reservations.findIndex(r => r.id === id);
+    if (index === -1) return;
+
+    const res = reservations[index];
+
+    if (!isAdmin() && res.guest !== currentUser.username) {
+        alert("You cannot cancel this reservation!");
+        return;
+    }
+
+    const room = rooms.find(r => r.id === res.roomId);
+    if (room) {
+        room.status = "available";
+    }
+
+    reservations.splice(index, 1);
+
+    saveRooms();
+    saveReservations();
+
+    renderRoomOptions();
+    displayRooms();
+    displayReservations();
+}
+
+/* RESERVATIONS */
 function displayReservations() {
     const list = document.getElementById("reservationsList");
-    if (!list) return;
+    if (!list || !currentUser) return;
 
     list.innerHTML = "";
 
-    if (!currentUser) return;
+    let data = isAdmin()
+        ? reservations
+        : reservations.filter(r => r.guest === currentUser.username);
 
-    let filtered = [];
-
-    if (isAdmin()) {
-        filtered = reservations;
-    } else {
-        filtered = reservations.filter(
-            r => r.guest === currentUser.username
-        );
-    }
-
-    filtered.forEach(r => {
+    data.forEach(r => {
         list.innerHTML += `
             <div class="list-item">
-                <div class="list-item-header">Резервация #${r.id}</div>
-                <div class="list-item-detail">Стая: ${r.roomId}</div>
-                <div class="list-item-detail">Нощи: ${r.nights}</div>
-                <div class="list-item-detail">Цена: ${r.totalPrice} Лв</div>
+                <div class="list-item-header">Reservation #${r.id}</div>
+                <div class="list-item-detail">Room: ${r.roomId}</div>
+                <div class="list-item-detail">Nights: ${r.nights}</div>
+                <div class="list-item-detail">Price: ${r.totalPrice} lv</div>
+                <div class="list-item-detail">
+                    Services: ${
+                        r.services?.length
+                            ? r.services.map(s => s.name + " (" + s.price + " lv)").join(", ")
+                            : "None"
+                    }
+                </div>
+
+                <button onclick="cancelReservation(${r.id})"
+                    style="margin-top:8px;padding:6px 10px;cursor:pointer;">
+                    Отмени
+                </button>
             </div>
         `;
     });
@@ -205,30 +220,23 @@ function displayReservations() {
 /* GUESTS */
 function displayGuests() {
     const list = document.getElementById("guestsList");
-    if (!list) return;
+    if (!list || !isAdmin()) return;
 
-    if (!isAdmin()) {
-        list.innerHTML = "";
-        return;
-    }
+    users = JSON.parse(localStorage.getItem("hotelUsers")) || [];
+
+    const guests = users.filter(u => u.role === "GUEST");
 
     list.innerHTML = "";
 
-    users = JSON.parse(localStorage.getItem("hotelUsers")) || [];
-    const guestsOnly = users.filter(u => u.role === "GUEST");
-
-    guestsOnly.forEach(u => {
-
-        const userRes = reservations.filter(r => r.guest === u.username);
+    guests.forEach(u => {
+        const resCount = reservations.filter(r => r.guest === u.username).length;
 
         list.innerHTML += `
             <div class="list-item">
                 <div class="list-item-header">${u.fullName}</div>
                 <div class="list-item-detail">@${u.username}</div>
                 <div class="list-item-detail">${u.email}</div>
-                <div class="list-item-detail">
-                    ${userRes.length ? "Reservations: " + userRes.length : "No reservations"}
-                </div>
+                <div class="list-item-detail">Reservations: ${resCount}</div>
             </div>
         `;
     });

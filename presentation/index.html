@@ -17,7 +17,6 @@
             <li><a class="nav-link" onclick="showSection('reservations')">Резервации</a></li>
             <li><a class="nav-link" onclick="showSection('services')">Услуги</a></li>
 
-            <!-- ADMIN ONLY -->
             <li id="adminRoomsMenu">
                 <a class="nav-link" onclick="showSection('rooms')">Стаи</a>
             </li>
@@ -49,6 +48,16 @@
     <input type="date" id="resCheckIn" class="input-field">
     <input type="date" id="resCheckOut" class="input-field">
 
+    <!-- SERVICES -->
+    <div style="margin:10px 0; padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <h3>Допълнителни услуги</h3>
+
+        <label><input type="checkbox" class="service-check" data-name="Храна" data-price="50"> Храна (50 лв)</label><br>
+        <label><input type="checkbox" class="service-check" data-name="СПА" data-price="120"> СПА (120 лв)</label><br>
+        <label><input type="checkbox" class="service-check" data-name="Транспорт" data-price="80"> Транспорт (80 лв)</label><br>
+        <label><input type="checkbox" class="service-check" data-name="Турове" data-price="200"> Турове (200 лв)</label>
+    </div>
+
     <button class="btn btn-primary" onclick="addReservation()">Създай</button>
 
     <div id="reservationsList"></div>
@@ -69,7 +78,6 @@
 </section>
 
 <section id="rooms" class="section">
-
     <h2>Стаи (Admin)</h2>
 
     <div id="roomForm">
@@ -89,27 +97,16 @@
 
     <div class="services-grid">
         <div class="service-card">
-            <h3>Храна</h3>
-            <p>Закуска и вечеря</p>
-            <p class="price">25 - 50 лв</p>
+            <h3>Храна</h3><p>Закуска и вечеря</p><p class="price">25 - 50 лв</p>
         </div>
-
         <div class="service-card">
-            <h3>СПА</h3>
-            <p>Масажи и басейн</p>
-            <p class="price">40 - 120 лв</p>
+            <h3>СПА</h3><p>Масажи и басейн</p><p class="price">40 - 120 лв</p>
         </div>
-
         <div class="service-card">
-            <h3>Транспорт</h3>
-            <p>Летищен трансфер</p>
-            <p class="price">30 - 80 лв</p>
+            <h3>Транспорт</h3><p>Летищен трансфер</p><p class="price">30 - 80 лв</p>
         </div>
-
         <div class="service-card">
-            <h3>Турове</h3>
-            <p>Екскурзии</p>
-            <p class="price">60 - 200 лв</p>
+            <h3>Турове</h3><p>Екскурзии</p><p class="price">60 - 200 лв</p>
         </div>
     </div>
 </section>

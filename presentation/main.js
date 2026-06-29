@@ -212,9 +212,98 @@ function displayReservations() {
                     style="margin-top:8px;padding:6px 10px;cursor:pointer;">
                     Отмени
                 </button>
+                <button onclick="generateInvoice(${r.id})"
+                    style="margin-top:8px;margin-left:6px;padding:6px 10px;cursor:pointer;">
+                    Фактура
+                </button>
             </div>
         `;
     });
+}
+
+/* INVOICE (RECEIPT) */
+let invoiceCounter = JSON.parse(localStorage.getItem("invoiceCounter")) || 1000;
+
+function generateInvoice(reservationId) {
+    const r = reservations.find(res => res.id === reservationId);
+    if (!r) return alert("Резервацията не е намерена!");
+
+    invoiceCounter++;
+    localStorage.setItem("invoiceCounter", JSON.stringify(invoiceCounter));
+
+    const room = rooms.find(room => room.id === r.roomId);
+    const roomPrice = room ? room.price : 0;
+    const roomTotal = roomPrice * r.nights;
+
+    const servicesRows = (r.services || []).length
+        ? r.services.map(s => `
+            <div class="receipt-row">
+                <span>${s.name}</span>
+                <span>${s.price.toFixed(2)} лв</span>
+            </div>
+        `).join("")
+        : `<div class="receipt-row"><span>Без допълнителни услуги</span><span></span></div>`;
+
+    const now = new Date();
+    const dateStr = now.toLocaleDateString("bg-BG") + " " + now.toLocaleTimeString("bg-BG");
+
+    const receiptHtml = `
+        <div class="receipt-overlay" onclick="closeInvoice(event)">
+            <div class="receipt" onclick="event.stopPropagation()">
+                <div class="receipt-header">
+                    <h3>Hotel Management</h3>
+                    <p>Фактура № ${invoiceCounter}</p>
+                    <p>${dateStr}</p>
+                </div>
+                <div class="receipt-divider"></div>
+                <div class="receipt-row">
+                    <span>Гост</span>
+                    <span>${r.guest}</span>
+                </div>
+                <div class="receipt-row">
+                    <span>Резервация №</span>
+                    <span>${r.id}</span>
+                </div>
+                <div class="receipt-row">
+                    <span>Стая</span>
+                    <span>#${r.roomId}</span>
+                </div>
+                <div class="receipt-row">
+                    <span>Нощувки</span>
+                    <span>${r.nights}</span>
+                </div>
+                <div class="receipt-row">
+                    <span>Цена/нощ</span>
+                    <span>${roomPrice.toFixed(2)} лв</span>
+                </div>
+                <div class="receipt-row">
+                    <span><strong>Настаняване общо</strong></span>
+                    <span><strong>${roomTotal.toFixed(2)} лв</strong></span>
+                </div>
+                <div class="receipt-divider"></div>
+                <p class="receipt-subtitle">Допълнителни услуги</p>
+                ${servicesRows}
+                <div class="receipt-divider"></div>
+                <div class="receipt-row receipt-total">
+                    <span>ОБЩА СУМА</span>
+                    <span>${r.totalPrice.toFixed(2)} лв</span>
+                </div>
+                <p class="receipt-footer">Благодарим Ви, че избрахте нашия хотел!</p>
+                <button class="btn btn-primary" onclick="closeInvoice()">Затвори</button>
+            </div>
+        </div>
+    `;
+
+    const container = document.createElement("div");
+    container.id = "invoiceContainer";
+    container.innerHTML = receiptHtml;
+    document.body.appendChild(container);
+}
+
+function closeInvoice(event) {
+    if (event && event.target.id !== "invoiceContainer" && !event.target.classList.contains("receipt-overlay")) return;
+    const el = document.getElementById("invoiceContainer");
+    if (el) el.remove();
 }
 
 /* GUESTS */

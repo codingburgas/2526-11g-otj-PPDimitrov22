@@ -303,3 +303,16 @@ footer {
     color: #666;
     margin: 0.75rem 0;
 }
+
+.receipt .field-group {
+    margin-bottom: 0.75rem;
+    text-align: left;
+}
+
+.receipt .field-group label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 0.25rem;
+}

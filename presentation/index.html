@@ -49,14 +49,21 @@
     <input type="date" id="resCheckIn" class="input-field">
     <input type="date" id="resCheckOut" class="input-field">
 
+    <!-- ПАКЕТНИ ОФЕРТИ -->
+    <div style="margin:10px 0; padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <h3>Пакетна оферта (по избор)</h3>
+        <select id="resPackage" class="input-field">
+            <option value="">Без пакет (по дати)</option>
+            <option value="weekend">Уикенд пакет — 2 нощувки, -10%</option>
+            <option value="week">Седмичен пакет — 7 нощувки, -15%</option>
+            <option value="spa">Спа пакет — 3 нощувки, -5% + СПА включено</option>
+        </select>
+    </div>
+
     <!-- SERVICES -->
     <div style="margin:10px 0; padding:10px; border:1px solid #ddd; border-radius:6px;">
         <h3>Допълнителни услуги</h3>
-
-        <label><input type="checkbox" class="service-check" data-name="Храна" data-price="50"> Храна (50 лв)</label><br>
-        <label><input type="checkbox" class="service-check" data-name="СПА" data-price="120"> СПА (120 лв)</label><br>
-        <label><input type="checkbox" class="service-check" data-name="Транспорт" data-price="80"> Транспорт (80 лв)</label><br>
-        <label><input type="checkbox" class="service-check" data-name="Турове" data-price="200"> Турове (200 лв)</label>
+        <div id="serviceCheckboxes"></div>
     </div>
 
     <button class="btn btn-primary" onclick="addReservation()">Създай</button>
@@ -66,15 +73,6 @@
 
 <section id="guests" class="section">
     <h2>Гости</h2>
-
-    <input id="guestId" class="input-field">
-    <input id="guestName" class="input-field">
-    <input id="guestEmail" class="input-field">
-    <input id="guestPhone" class="input-field">
-    <input id="guestAddress" class="input-field">
-
-    <button class="btn btn-success" onclick="addGuest()">Добави</button>
-
     <div id="guestsList"></div>
 </section>
 
@@ -96,20 +94,15 @@
 <section id="services" class="section">
     <h2>Услуги</h2>
 
-    <div class="services-grid">
-        <div class="service-card">
-            <h3>Храна</h3><p>Закуска и вечеря</p><p class="price">25 - 50 лв</p>
-        </div>
-        <div class="service-card">
-            <h3>СПА</h3><p>Масажи и басейн</p><p class="price">40 - 120 лв</p>
-        </div>
-        <div class="service-card">
-            <h3>Транспорт</h3><p>Летищен трансфер</p><p class="price">30 - 80 лв</p>
-        </div>
-        <div class="service-card">
-            <h3>Турове</h3><p>Екскурзии</p><p class="price">60 - 200 лв</p>
-        </div>
+    <div id="adminServiceForm" style="display:none; margin-bottom:1rem; padding:1rem; border:1px solid #ddd; border-radius:6px;">
+        <h3>Добави услуга</h3>
+        <input id="serviceName" class="input-field" placeholder="Име на услугата">
+        <input id="serviceDescription" class="input-field" placeholder="Описание">
+        <input id="servicePrice" class="input-field" type="number" placeholder="Цена (лв)">
+        <button class="btn btn-success" onclick="addService()">Добави</button>
     </div>
+
+    <div id="servicesGrid" class="services-grid"></div>
 </section>
 
 </div>

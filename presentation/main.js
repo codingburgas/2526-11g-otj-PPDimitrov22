@@ -10,6 +10,100 @@ let rooms = JSON.parse(localStorage.getItem("rooms")) || [
 
 let reservations = JSON.parse(localStorage.getItem("reservations")) || [];
 
+let services = JSON.parse(localStorage.getItem("hotelServices")) || [
+    { id: 1, name: "Храна", description: "Закуска и вечеря", price: 50 },
+    { id: 2, name: "СПА", description: "Масажи и басейн", price: 120 },
+    { id: 3, name: "Транспорт", description: "Летищен трансфер", price: 80 },
+    { id: 4, name: "Турове", description: "Екскурзии", price: 200 }
+];
+
+function saveServices() {
+    localStorage.setItem("hotelServices", JSON.stringify(services));
+}
+
+function addService() {
+    if (!isAdmin()) return;
+
+    const name = document.getElementById("serviceName").value.trim();
+    const description = document.getElementById("serviceDescription").value.trim();
+    const price = Number(document.getElementById("servicePrice").value);
+
+    if (!name || !price) return alert("Въведи име и цена!");
+
+    const id = services.length ? Math.max(...services.map(s => s.id)) + 1 : 1;
+    services.push({ id, name, description, price });
+    saveServices();
+
+    document.getElementById("serviceName").value = "";
+    document.getElementById("serviceDescription").value = "";
+    document.getElementById("servicePrice").value = "";
+
+    displayServices();
+    renderServiceCheckboxes();
+}
+
+function deleteService(id) {
+    if (!isAdmin()) return;
+    services = services.filter(s => s.id !== id);
+    saveServices();
+    displayServices();
+    renderServiceCheckboxes();
+}
+
+function displayServices() {
+    const grid = document.getElementById("servicesGrid");
+    if (!grid) return;
+
+    const adminForm = document.getElementById("adminServiceForm");
+    if (adminForm) adminForm.style.display = isAdmin() ? "block" : "none";
+
+    grid.innerHTML = "";
+    services.forEach(s => {
+        grid.innerHTML += `
+            <div class="service-card">
+                <h3>${s.name}</h3>
+                <p>${s.description}</p>
+                <p class="price">${s.price} лв</p>
+                ${isAdmin() ? `<button onclick="deleteService(${s.id})" style="margin-top:8px;padding:4px 8px;cursor:pointer;background:#dc3545;color:white;border:none;border-radius:4px;">Изтрий</button>` : ""}
+            </div>
+        `;
+    });
+}
+
+function renderServiceCheckboxes() {
+    const container = document.getElementById("serviceCheckboxes");
+    if (!container) return;
+
+    container.innerHTML = "";
+    services.forEach(s => {
+        container.innerHTML += `
+            <label>
+                <input type="checkbox" class="service-check" data-name="${s.name}" data-price="${s.price}">
+                ${s.name} (${s.price} лв)
+            </label><br>
+        `;
+    });
+}
+
+/* STAY TYPES */
+const STAY_TYPES = [
+    { name: "Краткосрочен престой", minNights: 1, maxNights: 3 },
+    { name: "Дългосрочен престой", minNights: 4, maxNights: 13 },
+    { name: "Дългосрочен престой", minNights: 14, maxNights: Infinity }
+];
+
+const PACKAGE_OFFERS = [
+    { id: "weekend", name: "Уикенд пакет", nights: 2, discount: 10, description: "2 нощувки с 10% отстъпка" },
+    { id: "week",    name: "Седмичен пакет", nights: 7, discount: 15, description: "7 нощувки с 15% отстъпка" },
+    { id: "spa",     name: "Спа пакет", nights: 3, discount: 5, description: "3 нощувки + спа процедури включени" }
+];
+
+function getStayType(nights) {
+    if (nights <= 3) return "Краткосрочен престой";
+    if (nights <= 13) return "Дългосрочен престой";
+    return "Дългосрочен престой (extended)";
+}
+
 /* LOYALTY PROGRAM */
 const LOYALTY_LEVELS = [
     { name: "Bronze", minPoints: 0, discount: 0 },
@@ -76,6 +170,10 @@ function saveReservations() {
 window.onload = function () {
     currentUser = JSON.parse(localStorage.getItem("hotelCurrentUser")) || null;
 
+    console.log("DEBUG currentUser:", currentUser);
+    console.log("DEBUG isAdmin:", isAdmin());
+    console.log("DEBUG location:", window.location.href);
+
     const adminRooms = document.getElementById("adminRoomsMenu");
     const adminGuests = document.getElementById("adminGuestsMenu");
 
@@ -89,6 +187,8 @@ window.onload = function () {
     displayReservations();
     displayGuests();
     displayLoyaltyCard();
+    displayServices();
+    renderServiceCheckboxes();
 };
 
 /* NAV */
@@ -98,6 +198,7 @@ function showSection(sectionId) {
 
     if (sectionId === "guests") displayGuests();
     if (sectionId === "home") displayLoyaltyCard();
+    if (sectionId === "services") displayServices();
 }
 
 /* LOGOUT */
@@ -166,14 +267,29 @@ function addReservation() {
     const roomId = document.getElementById("resRoomId").value;
     const checkIn = document.getElementById("resCheckIn").value;
     const checkOut = document.getElementById("resCheckOut").value;
+    const selectedPackage = document.getElementById("resPackage")?.value || "";
 
     const room = rooms.find(r => r.id === roomId);
     if (!room) return alert("Room not found");
 
-    const nights = Math.max(
+    let nights = Math.max(
         1,
         Math.floor((new Date(checkOut) - new Date(checkIn)) / 86400000)
     );
+
+    let packageDiscount = 0;
+    let packageName = null;
+
+    if (selectedPackage) {
+        const pkg = PACKAGE_OFFERS.find(p => p.id === selectedPackage);
+        if (pkg) {
+            nights = pkg.nights;
+            packageDiscount = pkg.discount;
+            packageName = pkg.name;
+        }
+    }
+
+    const stayType = getStayType(nights);
 
     const services = Array.from(document.querySelectorAll(".service-check:checked"))
         .map(s => ({
@@ -182,11 +298,11 @@ function addReservation() {
         }));
 
     const servicesTotal = services.reduce((a, b) => a + b.price, 0);
-
     const baseTotal = nights * room.price + servicesTotal;
 
     const loyalty = getLoyaltyInfo(currentUser.username);
-    const discountAmount = baseTotal * (loyalty.level.discount / 100);
+    const totalDiscountPercent = Math.min(loyalty.level.discount + packageDiscount, 30);
+    const discountAmount = baseTotal * (totalDiscountPercent / 100);
     const totalPrice = baseTotal - discountAmount;
 
     reservations.push({
@@ -194,6 +310,9 @@ function addReservation() {
         guest: currentUser.username,
         roomId,
         nights,
+        stayType,
+        packageName,
+        packageDiscount,
         services,
         baseTotal,
         loyaltyLevel: loyalty.level.name,
@@ -259,6 +378,8 @@ function displayReservations() {
                 <div class="list-item-header">Reservation #${r.id}</div>
                 <div class="list-item-detail">Room: ${r.roomId}</div>
                 <div class="list-item-detail">Nights: ${r.nights}</div>
+                <div class="list-item-detail">Тип престой: <strong>${r.stayType || getStayType(r.nights)}</strong></div>
+                ${r.packageName ? `<div class="list-item-detail">Пакет: <strong>${r.packageName}</strong> (-${r.packageDiscount}%)</div>` : ""}
                 <div class="list-item-detail">
                     Services: ${
                         r.services?.length
@@ -347,6 +468,15 @@ function generateInvoice(reservationId) {
                     <span>Стая</span>
                     <span>#${r.roomId}</span>
                 </div>
+                <div class="receipt-row">
+                    <span>Тип престой</span>
+                    <span>${r.stayType || getStayType(r.nights)}</span>
+                </div>
+                ${r.packageName ? `
+                <div class="receipt-row">
+                    <span>Пакет</span>
+                    <span>${r.packageName} (-${r.packageDiscount}%)</span>
+                </div>` : ""}
                 <div class="receipt-row">
                     <span>Нощувки</span>
                     <span>${r.nights}</span>

@@ -152,6 +152,87 @@ function displayLoyaltyCard() {
     `;
 }
 
+/* ПЕРСОНАЛИЗИРАНИ ПРЕДЛОЖЕНИЯ */
+function getPersonalizedSuggestions(username) {
+    const userReservations = reservations.filter(r => r.guest === username && r.status !== "cancelled");
+
+    if (userReservations.length === 0) return [];
+
+    const suggestions = [];
+
+    // Брой нощувки общо
+    const totalNights = userReservations.reduce((sum, r) => sum + r.nights, 0);
+
+    // Най-използвани услуги
+    const serviceCount = {};
+    userReservations.forEach(r => {
+        (r.services || []).forEach(s => {
+            serviceCount[s.name] = (serviceCount[s.name] || 0) + 1;
+        });
+    });
+
+    const favouriteService = Object.entries(serviceCount).sort((a, b) => b[1] - a[1])[0];
+
+    // Предложение базирано на любима услуга
+    if (favouriteService) {
+        suggestions.push({
+            icon: "⭐",
+            text: `Забелязахме, че обичате "${favouriteService[0]}" — добавете я и към следващата си резервация!`
+        });
+    }
+
+    // Предложение за пакет ако има много нощувки
+    if (totalNights >= 5) {
+        suggestions.push({
+            icon: "🏨",
+            text: `Вие сте при нас ${totalNights} нощи общо! Разгледайте нашия Седмичен пакет с 15% отстъпка.`
+        });
+    }
+
+    // Предложение за СПА ако никога не е ползвал
+    const hasSpa = userReservations.some(r => (r.services || []).some(s => s.name === "СПА"));
+    if (!hasSpa) {
+        suggestions.push({
+            icon: "💆",
+            text: `Опитайте нашите СПА процедури — релакс и масажи на специална цена за лоялни гости!`
+        });
+    }
+
+    // Предложение за уикенд пакет ако резервациите са кратки
+    const avgNights = totalNights / userReservations.length;
+    if (avgNights <= 2) {
+        suggestions.push({
+            icon: "🌅",
+            text: `Забелязахме, че предпочитате кратки престои — нашият Уикенд пакет е идеален за вас (-10%)!`
+        });
+    }
+
+    return suggestions;
+}
+
+function displaySuggestions() {
+    const el = document.getElementById("suggestionsCard");
+    if (!el || !currentUser || isAdmin()) return;
+
+    const suggestions = getPersonalizedSuggestions(currentUser.username);
+
+    if (suggestions.length === 0) {
+        el.innerHTML = "";
+        return;
+    }
+
+    el.innerHTML = `
+        <div class="list-item">
+            <div class="list-item-header">Персонализирани предложения за вас</div>
+            ${suggestions.map(s => `
+                <div class="list-item-detail" style="margin:6px 0; padding:8px; background:#f8f9fa; border-radius:6px;">
+                    ${s.icon} ${s.text}
+                </div>
+            `).join("")}
+        </div>
+    `;
+}
+
 /* ROLE */
 function isAdmin() {
     return currentUser && currentUser.role === "ADMIN";
@@ -187,6 +268,7 @@ window.onload = function () {
     displayReservations();
     displayGuests();
     displayLoyaltyCard();
+    displaySuggestions();
     displayServices();
     renderServiceCheckboxes();
 };
@@ -197,7 +279,7 @@ function showSection(sectionId) {
     document.getElementById(sectionId).classList.add("active");
 
     if (sectionId === "guests") displayGuests();
-    if (sectionId === "home") displayLoyaltyCard();
+    if (sectionId === "home") { displayLoyaltyCard(); displaySuggestions(); }
     if (sectionId === "services") displayServices();
 }
 
@@ -305,8 +387,10 @@ function addReservation() {
     const discountAmount = baseTotal * (totalDiscountPercent / 100);
     const totalPrice = baseTotal - discountAmount;
 
+    const userReservationCount = reservations.filter(r => r.guest === currentUser.username).length;
+
     reservations.push({
-        id: reservations.length + 1,
+        id: userReservationCount + 1,
         guest: currentUser.username,
         roomId,
         nights,

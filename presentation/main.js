@@ -2,19 +2,19 @@ let currentUser = JSON.parse(localStorage.getItem("hotelCurrentUser")) || null;
 let users = JSON.parse(localStorage.getItem("hotelUsers")) || [];
 
 let rooms = JSON.parse(localStorage.getItem("rooms")) || [
-    { id: "101", type: "Single", price: 80, capacity: 1, status: "available" },
-    { id: "102", type: "Double", price: 120, capacity: 2, status: "available" },
-    { id: "201", type: "Suite", price: 200, capacity: 4, status: "available" },
-    { id: "301", type: "Quad", price: 250, capacity: 4, status: "available" }
+    { id: "101", type: "Single", price: 40, capacity: 1, status: "available" },
+    { id: "102", type: "Double", price: 80, capacity: 2, status: "available" },
+    { id: "201", type: "Suite", price: 150, capacity: 4, status: "available" },
+    { id: "301", type: "Quad", price: 200, capacity: 4, status: "available" }
 ];
 
 let reservations = JSON.parse(localStorage.getItem("reservations")) || [];
 
 let services = JSON.parse(localStorage.getItem("hotelServices")) || [
-    { id: 1, name: "Храна", description: "Закуска и вечеря", price: 50 },
-    { id: 2, name: "СПА", description: "Масажи и басейн", price: 120 },
-    { id: 3, name: "Транспорт", description: "Летищен трансфер", price: 80 },
-    { id: 4, name: "Турове", description: "Екскурзии", price: 200 }
+    { id: 1, name: "Храна", description: "Закуска и вечеря", price: 25 },
+    { id: 2, name: "СПА", description: "Масажи и басейн", price: 60 },
+    { id: 3, name: "Транспорт", description: "Летищен трансфер", price: 50 },
+    { id: 4, name: "Турове", description: "Екскурзии", price: 100 }
 ];
 
 function saveServices() {
@@ -63,7 +63,7 @@ function displayServices() {
             <div class="service-card">
                 <h3>${s.name}</h3>
                 <p>${s.description}</p>
-                <p class="price">${s.price} лв</p>
+                <p class="price">${s.price} €</p>
                 ${isAdmin() ? `<button onclick="deleteService(${s.id})" style="margin-top:8px;padding:4px 8px;cursor:pointer;background:#dc3545;color:white;border:none;border-radius:4px;">Изтрий</button>` : ""}
             </div>
         `;
@@ -79,7 +79,7 @@ function renderServiceCheckboxes() {
         container.innerHTML += `
             <label>
                 <input type="checkbox" class="service-check" data-name="${s.name}" data-price="${s.price}">
-                ${s.name} (${s.price} лв)
+                ${s.name} (${s.price} €)
             </label><br>
         `;
     });
@@ -316,7 +316,7 @@ function renderRoomOptions() {
         if (r.status === "available") {
             select.innerHTML += `
                 <option value="${r.id}">
-                    ${r.id} - ${r.type} (${r.price} lv)
+                    ${r.id} - ${r.type} (${r.price} €)
                 </option>
             `;
         }
@@ -334,7 +334,7 @@ function displayRooms() {
         list.innerHTML += `
             <div class="list-item">
                 <div class="list-item-header">Room #${r.id} - ${r.type}</div>
-                <div class="list-item-detail">Price: ${r.price} lv</div>
+                <div class="list-item-detail">Price: ${r.price}€</div>
                 <div class="list-item-detail">Capacity: ${r.capacity}</div>
                 <div class="list-item-detail">Status: ${r.status}</div>
             </div>
@@ -419,8 +419,8 @@ function addReservation() {
 }
 
 /* CANCEL RESERVATION */
-function cancelReservation(id) {
-    const index = reservations.findIndex(r => r.id === id);
+function cancelReservation(id, guest) {
+    const index = reservations.findIndex(r => r.id === id && r.guest === (guest || currentUser.username));
     if (index === -1) return;
 
     const res = reservations[index];
@@ -459,7 +459,7 @@ function displayReservations() {
     data.forEach(r => {
         list.innerHTML += `
             <div class="list-item">
-                <div class="list-item-header">Reservation #${r.id}</div>
+                <div class="list-item-header">Reservation #${r.id} ${isAdmin() ? `— ${r.guest}` : ""}</div>
                 <div class="list-item-detail">Room: ${r.roomId}</div>
                 <div class="list-item-detail">Nights: ${r.nights}</div>
                 <div class="list-item-detail">Тип престой: <strong>${r.stayType || getStayType(r.nights)}</strong></div>
@@ -467,29 +467,29 @@ function displayReservations() {
                 <div class="list-item-detail">
                     Services: ${
                         r.services?.length
-                            ? r.services.map(s => s.name + " (" + s.price + " lv)").join(", ")
+                            ? r.services.map(s => s.name + " (" + s.price + " €)").join(", ")
                             : "None"
                     }
                 </div>
                 ${r.loyaltyDiscountPercent ? `
                 <div class="list-item-detail">
-                    Лоялна отстъпка (${r.loyaltyLevel}): -${r.loyaltyDiscountPercent}% (-${r.discountAmount.toFixed(2)} лв)
+                    Лоялна отстъпка (${r.loyaltyLevel}): -${r.loyaltyDiscountPercent}% (-${r.discountAmount.toFixed(2)} euro)
                 </div>` : ""}
-                <div class="list-item-detail"><strong>Price: ${r.totalPrice.toFixed(2)} lv</strong></div>
+                <div class="list-item-detail"><strong>Price: ${r.totalPrice.toFixed(2)} €</strong></div>
                 <div class="list-item-detail">
                     Плащане: <strong>${r.paymentStatus}</strong>${r.paymentMethod ? " (" + r.paymentMethod + ")" : ""}
                 </div>
 
-                <button onclick="cancelReservation(${r.id})"
+                <button onclick="cancelReservation(${r.id}, '${r.guest}')"
                     style="margin-top:8px;padding:6px 10px;cursor:pointer;">
                     Отмени
                 </button>
-                <button onclick="generateInvoice(${r.id})"
+                <button onclick="generateInvoice(${r.id}, '${r.guest}')"
                     style="margin-top:8px;margin-left:6px;padding:6px 10px;cursor:pointer;">
                     Фактура
                 </button>
                 ${r.paymentStatus !== "Платено" ? `
-                <button onclick="openPayment(${r.id})"
+                <button onclick="openPayment(${r.id}, '${r.guest}')"
                     style="margin-top:8px;margin-left:6px;padding:6px 10px;cursor:pointer;">
                     Плати
                 </button>` : ""}
@@ -501,8 +501,8 @@ function displayReservations() {
 /* INVOICE (RECEIPT) */
 let invoiceCounter = JSON.parse(localStorage.getItem("invoiceCounter")) || 1000;
 
-function generateInvoice(reservationId) {
-    const r = reservations.find(res => res.id === reservationId);
+function generateInvoice(reservationId, guest) {
+    const r = reservations.find(res => res.id === reservationId && res.guest === (guest || currentUser.username));
     if (!r) return alert("Резервацията не е намерена!");
 
     invoiceCounter++;
@@ -516,7 +516,7 @@ function generateInvoice(reservationId) {
         ? r.services.map(s => `
             <div class="receipt-row">
                 <span>${s.name}</span>
-                <span>${s.price.toFixed(2)} лв</span>
+                <span>${s.price.toFixed(2)} €</span>
             </div>
         `).join("")
         : `<div class="receipt-row"><span>Без допълнителни услуги</span><span></span></div>`;
@@ -524,7 +524,7 @@ function generateInvoice(reservationId) {
     const discountRow = r.loyaltyDiscountPercent ? `
         <div class="receipt-row">
             <span>Лоялна отстъпка (${r.loyaltyLevel}, -${r.loyaltyDiscountPercent}%)</span>
-            <span>-${r.discountAmount.toFixed(2)} лв</span>
+            <span>-${r.discountAmount.toFixed(2)} €</span>
         </div>
     ` : "";
 
@@ -567,11 +567,11 @@ function generateInvoice(reservationId) {
                 </div>
                 <div class="receipt-row">
                     <span>Цена/нощ</span>
-                    <span>${roomPrice.toFixed(2)} лв</span>
+                    <span>${roomPrice.toFixed(2)} €</span>
                 </div>
                 <div class="receipt-row">
                     <span><strong>Настаняване общо</strong></span>
-                    <span><strong>${roomTotal.toFixed(2)} лв</strong></span>
+                    <span><strong>${roomTotal.toFixed(2)} €</strong></span>
                 </div>
                 <div class="receipt-divider"></div>
                 <p class="receipt-subtitle">Допълнителни услуги</p>
@@ -580,7 +580,7 @@ function generateInvoice(reservationId) {
                 ${discountRow}
                 <div class="receipt-row receipt-total">
                     <span>ОБЩА СУМА</span>
-                    <span>${r.totalPrice.toFixed(2)} лв</span>
+                    <span>${r.totalPrice.toFixed(2)} €</span>
                 </div>
                 <div class="receipt-row">
                     <span>Статус плащане</span>
@@ -605,8 +605,8 @@ function closeInvoice(event) {
 }
 
 /* ONLINE PAYMENT */
-function openPayment(reservationId) {
-    const r = reservations.find(res => res.id === reservationId);
+function openPayment(reservationId, guest) {
+    const r = reservations.find(res => res.id === reservationId && res.guest === (guest || currentUser.username));
     if (!r) return alert("Резервацията не е намерена!");
 
     const paymentHtml = `
@@ -614,7 +614,7 @@ function openPayment(reservationId) {
             <div class="receipt" onclick="event.stopPropagation()">
                 <div class="receipt-header">
                     <h3>Плащане</h3>
-                    <p>Резервация № ${r.id} — ${r.totalPrice.toFixed(2)} лв</p>
+                    <p>Резервация № ${r.id} — ${r.totalPrice.toFixed(2)} €</p>
                 </div>
                 <div class="receipt-divider"></div>
 
@@ -640,7 +640,7 @@ function openPayment(reservationId) {
 
                 <p id="paymentMessage" style="color:#dc3545; font-size:0.85rem; display:none;"></p>
 
-                <button class="btn btn-primary" onclick="confirmPayment(${r.id})">Плати ${r.totalPrice.toFixed(2)} лв</button>
+                <button class="btn btn-primary" onclick="confirmPayment(${r.id}, '${r.guest}')">Плати ${r.totalPrice.toFixed(2)} €</button>
                 <button class="btn" style="margin-top:0.5rem; background:#eee;" onclick="closePayment()">Отказ</button>
             </div>
         </div>
@@ -662,7 +662,7 @@ function closePayment(event) {
     if (el) el.remove();
 }
 
-function confirmPayment(reservationId) {
+function confirmPayment(reservationId, guest) {
     const method = document.getElementById("paymentMethod").value;
 
     if (method === "Карта") {
@@ -678,9 +678,8 @@ function confirmPayment(reservationId) {
         }
     }
 
-    const r = reservations.find(res => res.id === reservationId);
+    const r = reservations.find(res => res.id === reservationId && res.guest === (guest || currentUser.username));
     if (!r) return;
-
     r.paymentStatus = "Платено";
     r.paymentMethod = method;
 

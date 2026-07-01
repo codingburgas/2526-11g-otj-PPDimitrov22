@@ -57,10 +57,10 @@ public class Invoice {
         System.out.println("\n========== ФАКТУРА ==========");
         System.out.println("Номер на фактура: " + invoiceId);
         System.out.println("Номер на резервация: " + reservationId);
-        System.out.println("Базова цена: " + basePrice + " лв");
-        System.out.println("Отстъпка: " + discount + " лв");
-        System.out.println("Данък: " + tax + " лв");
-        System.out.println("ОБЩА СУМА: " + totalAmount + " лв");
+        System.out.println("Базова цена: " + basePrice + " €");
+        System.out.println("Отстъпка: " + discount + " €");
+        System.out.println("Данък: " + tax + " €");
+        System.out.println("ОБЩА СУМА: " + totalAmount + " €");
         System.out.println("Статус плащане: " + paymentStatus);
         System.out.println("===========================\n");
     }

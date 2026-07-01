@@ -26,7 +26,7 @@ public class Service {
     }
     public void displayInfo() {
         System.out.println("Услуга: " + serviceName);
-        System.out.println("Цена: " + price + " лв");
+        System.out.println("Цена: " + price + " €");
         System.out.println("Описание: " + description);
     }
 }

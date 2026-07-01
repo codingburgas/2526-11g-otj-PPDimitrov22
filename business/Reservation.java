@@ -56,7 +56,7 @@ public class Reservation {
         System.out.println("Стая ID: " + roomId);
         System.out.println("Вход: " + checkInDate);
         System.out.println("Изход: " + checkOutDate);
-        System.out.println("Обща цена: " + totalPrice + " лв");
+        System.out.println("Обща цена: " + totalPrice + " €");
         System.out.println("Статус: " + status);
     }
 }

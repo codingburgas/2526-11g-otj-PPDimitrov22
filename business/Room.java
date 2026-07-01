@@ -37,7 +37,7 @@ public class Room {
     }
     public void displayInfo() {
         System.out.println("Стая #" + roomId + " - " + roomType);
-        System.out.println("Цена за ноч: " + pricePerNight + " лв");
+        System.out.println("Цена за ноч: " + pricePerNight + " €");
         System.out.println("Капацитет: " + capacity + " лица");
         System.out.println("Статус: " + status);
     }

@@ -7,6 +7,7 @@ public class Room {
     private String status;
     private int capacity;
 
+    // Конструктор
     public Room(int roomId, String roomType, double pricePerNight, int capacity) {
         this.roomId = roomId;
         this.roomType = roomType;

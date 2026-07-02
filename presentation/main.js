@@ -85,7 +85,7 @@ function renderServiceCheckboxes() {
     });
 }
 
-/* STAY TYPES */
+//STAY TYPES
 const STAY_TYPES = [
     { name: "Краткосрочен престой", minNights: 1, maxNights: 3 },
     { name: "Дългосрочен престой", minNights: 4, maxNights: 13 },
@@ -104,7 +104,7 @@ function getStayType(nights) {
     return "Дългосрочен престой (extended)";
 }
 
-/* LOYALTY PROGRAM */
+// LOYALTY PROGRAM 
 const LOYALTY_LEVELS = [
     { name: "Bronze", minPoints: 0, discount: 0 },
     { name: "Silver", minPoints: 100, discount: 5 },
@@ -152,7 +152,7 @@ function displayLoyaltyCard() {
     `;
 }
 
-/* ПЕРСОНАЛИЗИРАНИ ПРЕДЛОЖЕНИЯ */
+//  ПЕРСОНАЛИЗИРАНИ ПРЕДЛОЖЕНИЯ 
 function getPersonalizedSuggestions(username) {
     const userReservations = reservations.filter(r => r.guest === username && r.status !== "cancelled");
 
@@ -233,12 +233,12 @@ function displaySuggestions() {
     `;
 }
 
-/* ROLE */
+// ROLE CHECK
 function isAdmin() {
     return currentUser && currentUser.role === "ADMIN";
 }
 
-/* SAVE */
+// SAVE
 function saveRooms() {
     localStorage.setItem("rooms", JSON.stringify(rooms));
 }
@@ -247,7 +247,7 @@ function saveReservations() {
     localStorage.setItem("reservations", JSON.stringify(reservations));
 }
 
-/* INIT */
+// INIT
 window.onload = function () {
     currentUser = JSON.parse(localStorage.getItem("hotelCurrentUser")) || null;
 
@@ -273,7 +273,7 @@ window.onload = function () {
     renderServiceCheckboxes();
 };
 
-/* NAV */
+// NAVIGATION
 function showSection(sectionId) {
     document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
     document.getElementById(sectionId).classList.add("active");
@@ -283,13 +283,13 @@ function showSection(sectionId) {
     if (sectionId === "services") displayServices();
 }
 
-/* LOGOUT */
+// LOGOUT
 function logout() {
     localStorage.removeItem("hotelCurrentUser");
     window.location.href = "auth.html";
 }
 
-/* ROOMS */
+// ROOMS
 function addRoom() {
     if (!isAdmin()) return;
 
@@ -305,7 +305,7 @@ function addRoom() {
     displayRooms();
 }
 
-/* ROOM OPTIONS */
+// ROOM OPTIONS
 function renderRoomOptions() {
     const select = document.getElementById("resRoomId");
     if (!select) return;
@@ -323,7 +323,7 @@ function renderRoomOptions() {
     });
 }
 
-/* ROOMS VIEW */
+// ROOMS VIEW
 function displayRooms() {
     const list = document.getElementById("roomsList");
     if (!list || !isAdmin()) return;
@@ -342,7 +342,7 @@ function displayRooms() {
     });
 }
 
-/* RESERVATION */
+// RESERVATION
 function addReservation() {
     if (!currentUser) return alert("Login first!");
 
@@ -418,7 +418,7 @@ function addReservation() {
     displayReservations();
 }
 
-/* CANCEL RESERVATION */
+// CANCEL RESERVATION
 function cancelReservation(id, guest) {
     const index = reservations.findIndex(r => r.id === id && r.guest === (guest || currentUser.username));
     if (index === -1) return;
@@ -445,7 +445,7 @@ function cancelReservation(id, guest) {
     displayReservations();
 }
 
-/* RESERVATIONS */
+// RESERVATIONS
 function displayReservations() {
     const list = document.getElementById("reservationsList");
     if (!list || !currentUser) return;
@@ -498,7 +498,7 @@ function displayReservations() {
     });
 }
 
-/* INVOICE (RECEIPT) */
+// INVOICE (RECEIPT)
 let invoiceCounter = JSON.parse(localStorage.getItem("invoiceCounter")) || 1000;
 
 function generateInvoice(reservationId, guest) {
@@ -604,7 +604,7 @@ function closeInvoice(event) {
     if (el) el.remove();
 }
 
-/* ONLINE PAYMENT */
+// ONLINE PAYMENT
 function openPayment(reservationId, guest) {
     const r = reservations.find(res => res.id === reservationId && res.guest === (guest || currentUser.username));
     if (!r) return alert("Резервацията не е намерена!");
@@ -688,7 +688,7 @@ function confirmPayment(reservationId, guest) {
     displayReservations();
 }
 
-/* GUESTS */
+// GUESTS
 function displayGuests() {
     const list = document.getElementById("guestsList");
     if (!list || !isAdmin()) return;
@@ -715,7 +715,7 @@ function displayGuests() {
     });
 }
 
-/* GUEST PLACEHOLDER */
+// GUEST PLACEHOLDER
 function addGuest() {
     alert("Guests are managed via registration page.");
 }

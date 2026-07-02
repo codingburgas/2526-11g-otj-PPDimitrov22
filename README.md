@@ -18,7 +18,7 @@
 ## 📁 Project Layout
 
 <p align="center">
-    <img src="./Documentation/PPDimitrov22_ArchitectureDiagram.png" alt="Project Structure" width="600" />
+    <img src="./Documentation/ArchitectureDiagram.png" alt="Project Structure" width="600" />
 </p>
 
 ### Used technologies for development

@@ -26,9 +26,8 @@
     <a href="https://www.oracle.com/java/"><img src="https://raw.githubusercontent.com/github/explore/main/topics/java/java.png" alt="Java" width=48px /></a>
 </p>
 
-### Used tools for our documentation & presentation
+### Used tools for documentation
 <p align="left">
 <a href="https://www.microsoft.com/en-ww/microsoft-365/word"><img src="https://img.icons8.com/color/344/ms-word.png" alt="MS Word logo" width=48px /></a>
-<a href="https://www.microsoft.com/en-ww/microsoft-365/powerpoint"><img src="https://img.icons8.com/color/344/ms-powerpoint.png" alt="MS PowerPoint logo" width=48px /></a>
 </p>
-<h1 align="center">Since you came all the way here, why don't you give us a ⭐️ :)</p>   
+<h1 align="center">Since you came all the way here, why don't you give a ⭐️ :)</p>   
